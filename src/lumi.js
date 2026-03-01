@@ -29,6 +29,7 @@ export async function askLumi(messages, onToken) {
       if (!line.startsWith('data:')) continue;
 
       const json = line.replace(/^data:\s*/, '').trim();
+      
       if (json === '[DONE]') return;
 
       try {
