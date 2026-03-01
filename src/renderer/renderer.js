@@ -2,6 +2,9 @@ const messagesDiv = document.getElementById('messages');
 const promptInput = document.getElementById('prompt');
 const sendButton = document.getElementById('send');
 
+// Global conversation history for the backend
+let messages = [];
+
 function addMessage(role, text) {
   const div = document.createElement('div');
   div.classList.add('message', role);
@@ -15,22 +18,33 @@ async function sendMessage() {
   const userText = promptInput.value.trim();
   if (!userText) return;
 
-  // Add user bubble
+  // Add user bubble to UI
   addMessage('user', userText);
   promptInput.value = '';
+
+  // Add user message to conversation history
+  messages.push({
+    role: 'user',
+    content: userText
+  });
 
   // Create empty Lumi bubble for streaming
   const lumiBubble = addMessage('lumi', '');
 
-  // Prepare messages array for Lumi backend
-  const messages = [
-    { role: 'user', content: userText }
-  ];
+  // We'll accumulate the assistant's full reply here
+  let assistantText = '';
 
   // Stream tokens into the Lumi bubble
   await window.lumi.ask(messages, token => {
-    lumiBubble.textContent += token;
+    assistantText += token;
+    lumiBubble.textContent = assistantText;
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+
+  // After streaming finishes, add assistant reply to conversation history
+  messages.push({
+    role: 'assistant',
+    content: assistantText
   });
 }
 

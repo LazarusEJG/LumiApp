@@ -1,8 +1,8 @@
 {
   "name": "lumiapplication",
-  "version": "1.0.0",
-  "description": "Lumi",
-  "license": "ISC",
+  "version": "1.0.2",
+  "description": "A standalone llm loader with a chat interface",
+  "license": "MIT",
   "author": "EJ Gordon",
   "type": "module",
   "main": "src/main.js",
