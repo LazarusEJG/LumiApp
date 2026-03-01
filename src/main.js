@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +22,6 @@ function createWindow() {
   });
 
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
-
 }
 
 function waitForServerReady(port, callback) {
@@ -44,11 +44,21 @@ app.whenReady().then(() => {
   const isDev = !app.isPackaged;
 
   const basePath = isDev
-    ? path.join(__dirname, '..', 'resources', 'backend')   // <-- FIXED
+    ? path.join(__dirname, '..', 'resources', 'backend')
     : path.join(process.resourcesPath, 'backend');
 
   const backendPath = path.join(basePath, 'llama-server.exe');
-  const modelPath = path.join(basePath, 'lumi-core-mistral.gguf');
+
+  // 🔍 Find any .gguf file in the backend folder
+  const modelFile = fs.readdirSync(basePath).find(f => f.endsWith('.gguf'));
+
+  if (!modelFile) {
+    console.error("❌ No .gguf model found in backend folder");
+    return;
+  }
+
+  const modelPath = path.join(basePath, modelFile);
+  console.log("🧠 Loading model:", modelPath);
 
   serverProcess = spawn(backendPath, [
     '--model', modelPath,
