@@ -1,0 +1,16 @@
+{
+  "name": "lumiapplication",
+  "version": "1.0.0",
+  "description": "Lumi",
+  "license": "ISC",
+  "author": "EJ",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "electron": "^40.6.1"
+  }
+}

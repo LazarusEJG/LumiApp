@@ -1,0 +1,17 @@
+# Node
+node_modules/
+npm-debug.log
+
+# Electron build output
+dist/
+out/
+
+# Backend binaries
+resources/backend/*.exe
+resources/backend/*.dll
+resources/backend/*.gguf
+resources/models/Lumi-Mistral/
+
+# OS junk
+.DS_Store
+Thumbs.db

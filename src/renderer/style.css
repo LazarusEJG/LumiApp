@@ -1,0 +1,100 @@
+/* Global layout */
+body {
+  margin: 0;
+  padding: 0;
+  background: #121212;          /* deep charcoal */
+  color: #e6e6e6;               /* soft light gray */
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Chat container */
+#chat {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* Message list */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 10px;
+}
+
+/* Message bubbles */
+.message {
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 80%;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 15px;
+}
+
+/* User bubble (right side) */
+.user {
+  background: #2a2a2a;          /* dark gray */
+  color: #e6e6e6;
+  align-self: flex-end;
+  border: 1px solid #3a3a3a;
+}
+
+/* Lumi bubble (left side) */
+.lumi {
+  background: #1e1e1e;          /* slightly lighter charcoal */
+  color: #f0eaff;               /* soft lavender-white */
+  align-self: flex-start;
+  border: 1px solid #3b2f4a;    /* subtle purple tint */
+  box-shadow: 0 0 6px rgba(140, 90, 200, 0.25);
+}
+
+/* Input area */
+#input-area {
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+/* Text input */
+#prompt {
+  flex: 1;
+  height: 60px;
+  resize: none;
+  padding: 10px;
+  font-size: 14px;
+  background: #1a1a1a;
+  color: #e6e6e6;
+  border: 1px solid #333;
+  border-radius: 6px;
+  outline: none;
+}
+
+#prompt:focus {
+  border-color: #7a4fcf;        /* purple accent */
+  box-shadow: 0 0 4px rgba(122, 79, 207, 0.5);
+}
+
+/* Send button */
+#send {
+  padding: 0 20px;
+  font-size: 14px;
+  background: #7a4fcf;          /* Lumi purple */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#send:hover {
+  background: #8d63e0;
+}
+
+#send:active {
+  background: #6a3fba;
+}
