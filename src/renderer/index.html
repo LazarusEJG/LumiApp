@@ -1,12 +1,87 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
-  <title>Lumi</title>
+  <title>LumiApp</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
+  <!-- Hamburger icon -->
+  <div id="menu-button">☰</div>
+
+  <!-- Dimming overlay -->
+  <div id="overlay"></div>
+
+  <!-- Settings drawer -->
+  <div id="settings-drawer">
+
+    <!-- Tabs -->
+    <div id="drawer-tabs">
+      <button class="drawer-tab active" data-tab="persona">Persona</button>
+      <button class="drawer-tab" data-tab="sampling">Sampling</button>
+      <button class="drawer-tab" data-tab="model">Model</button>
+    </div>
+
+    <!-- Scrollable content -->
+    <div id="drawer-content">
+
+      <!-- Persona tab -->
+      <div class="tab-panel active" id="tab-persona">
+        <h3>System Prompt</h3>
+        <textarea id="persona-input" placeholder="Enter Lumi's persona..."></textarea>
+      </div>
+
+      <!-- Sampling tab -->
+      <div class="tab-panel" id="tab-sampling">
+        <h3>Sampling Parameters</h3>
+
+        <label>Temperature</label>
+        <div class="slider-row">
+          <input type="range" id="temp-slider" min="0" max="2" step="0.01">
+          <span id="temp-value"></span>
+        </div>
+
+        <label>Top‑P</label>
+        <div class="slider-row">
+          <input type="range" id="top-p-slider" min="0" max="1" step="0.01">
+          <span id="top-p-value"></span>
+        </div>
+
+        <label>Min‑P</label>
+        <div class="slider-row">
+          <input type="range" id="min-p-slider" min="0" max="1" step="0.01">
+          <span id="min-p-value"></span>
+        </div>
+
+        <label>Top‑K</label>
+        <div class="slider-row">
+          <input type="range" id="top-k-slider" min="0" max="200" step="1">
+          <span id="top-k-value"></span>
+        </div>
+
+        <label>Repetition Penalty</label>
+        <div class="slider-row">
+          <input type="range" id="rep-pen-slider" min="0.5" max="2" step="0.01">
+          <span id="rep-pen-value"></span>
+        </div>
+
+        <label>Max Tokens</label>
+        <input type="number" id="max-tokens-input" min="1" max="8192">
+      </div>
+
+      <!-- Model tab -->
+      <div class="tab-panel" id="tab-model">
+        <h3>Model Info</h3>
+        <p id="model-info">Model: (loaded automatically)</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Chat UI -->
   <div id="chat">
     <div id="messages"></div>
 
@@ -18,4 +93,5 @@
 
   <script src="renderer.js"></script>
 </body>
+
 </html>

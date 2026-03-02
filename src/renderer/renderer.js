@@ -1,8 +1,109 @@
+console.log("window.lumi =", window.lumi);
+
+// Drawer elements
+const menuButton = document.getElementById("menu-button");
+const drawer = document.getElementById("settings-drawer");
+const overlay = document.getElementById("overlay");
+
+// Tabs
+const tabs = document.querySelectorAll(".drawer-tab");
+const panels = document.querySelectorAll(".tab-panel");
+
+// Settings inputs
+const personaInput = document.getElementById("persona-input");
+const tempSlider = document.getElementById("temp-slider");
+const topPSlider = document.getElementById("top-p-slider");
+const minPSlider = document.getElementById("min-p-slider");
+const topKSlider = document.getElementById("top-k-slider");
+const repPenSlider = document.getElementById("rep-pen-slider");
+const maxTokensInput = document.getElementById("max-tokens-input");
+
+// Slider value labels
+const tempValue = document.getElementById("temp-value");
+const topPValue = document.getElementById("top-p-value");
+const minPValue = document.getElementById("min-p-value");
+const topKValue = document.getElementById("top-k-value");
+const repPenValue = document.getElementById("rep-pen-value");
+
+// Update slider number labels
+function updateSliderLabels() {
+  tempValue.textContent = tempSlider.value;
+  topPValue.textContent = topPSlider.value;
+  minPValue.textContent = minPSlider.value;
+  topKValue.textContent = topKSlider.value;
+  repPenValue.textContent = repPenSlider.value;
+}
+
+// Open drawer
+menuButton.addEventListener("click", async () => {
+  const settings = await window.lumi.getSettings();
+
+  personaInput.value = settings.persona;
+  tempSlider.value = settings.temperature;
+  topPSlider.value = settings.top_p;
+  minPSlider.value = settings.min_p;
+  topKSlider.value = settings.top_k;
+  repPenSlider.value = settings.repetition_penalty;
+  maxTokensInput.value = settings.max_tokens;
+
+  updateSliderLabels();
+
+  drawer.classList.add("open");
+  overlay.classList.add("visible");
+});
+
+// Close drawer
+overlay.addEventListener("click", () => {
+  drawer.classList.remove("open");
+  overlay.classList.remove("visible");
+});
+
+// Tab switching
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => t.classList.remove("active"));
+    panels.forEach(p => p.classList.remove("active"));
+
+    tab.classList.add("active");
+    document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
+  });
+});
+
+// Save settings on change
+function saveSettings() {
+  window.lumi.setSettings({
+    persona: personaInput.value,
+    temperature: parseFloat(tempSlider.value),
+    top_p: parseFloat(topPSlider.value),
+    min_p: parseFloat(minPSlider.value),
+    top_k: parseInt(topKSlider.value),
+    repetition_penalty: parseFloat(repPenSlider.value),
+    max_tokens: parseInt(maxTokensInput.value)
+  });
+}
+
+// Attach listeners to update settings + slider labels
+[
+  personaInput,
+  tempSlider,
+  topPSlider,
+  minPSlider,
+  topKSlider,
+  repPenSlider,
+  maxTokensInput
+].forEach(el => el.addEventListener("input", () => {
+  saveSettings();
+  updateSliderLabels();
+}));
+
+// -----------------------------
+// Chat Logic
+// -----------------------------
 const messagesDiv = document.getElementById('messages');
 const promptInput = document.getElementById('prompt');
 const sendButton = document.getElementById('send');
 
-// Global conversation history for the backend
+// Global conversation history
 let messages = [];
 
 function addMessage(role, text) {
@@ -18,34 +119,23 @@ async function sendMessage() {
   const userText = promptInput.value.trim();
   if (!userText) return;
 
-  // Add user bubble to UI
   addMessage('user', userText);
   promptInput.value = '';
 
-  // Add user message to conversation history
-  messages.push({
-    role: 'user',
-    content: userText
-  });
+  messages.push({ role: 'user', content: userText });
 
-  // Create empty Lumi bubble for streaming
   const lumiBubble = addMessage('lumi', '');
-
-  // We'll accumulate the assistant's full reply here
   let assistantText = '';
 
-  // Stream tokens into the Lumi bubble
-  await window.lumi.ask(messages, token => {
+  const settings = await window.lumi.getSettings();
+
+  await window.lumi.ask(messages, settings, token => {
     assistantText += token;
     lumiBubble.textContent = assistantText;
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 
-  // After streaming finishes, add assistant reply to conversation history
-  messages.push({
-    role: 'assistant',
-    content: assistantText
-  });
+  messages.push({ role: 'assistant', content: assistantText });
 }
 
 sendButton.addEventListener('click', sendMessage);

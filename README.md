@@ -4,6 +4,8 @@ LumiApp is a fully standalone desktop application that runs large language model
 
 The goal of LumiApp is to provide a clean, simple, offline chat interface powered entirely by local inference. No cloud calls, no telemetry, no setup beyond dropping in a .gguf model.
 
+Backend packages can be used to allow for using GPU instead of CPU (check releases)
+
 # Features
 
 Fully local inference using llama.cpp’s llama-server
@@ -66,6 +68,15 @@ resources/backend/
 These files ensure llama.cpp can initialize the correct compute backend on any CPU architecture.
 
 # Releases
+
+# v1.1.3
+
+Added dynamic .gguf file loading
+(previously the .gguf file needed a specific name)
+
+# v1.1.2
+
+Added conversational memory
 
 # v1.0.2
 

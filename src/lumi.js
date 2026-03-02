@@ -1,14 +1,31 @@
-export async function askLumi(messages, onToken) {
+export async function askLumi(messages, settings, onToken) {
+  // Prepend system persona message for llama-server
+  const fullMessages = [
+    { role: "system", content: settings.persona || "" },
+    ...messages
+  ];
+
+  // Build the request body with persona + sampling parameters
+  const body = {
+    model: 'lumi-core-mistral.gguf',
+    messages: fullMessages,
+    stream: true,
+
+    // Sampling parameters
+    temperature: settings.temperature,
+    top_p: settings.top_p,
+    top_k: settings.top_k,
+    min_p: settings.min_p,
+    repeat_penalty: settings.repetition_penalty,
+    max_tokens: settings.max_tokens
+  };
+
   const response = await fetch('http://127.0.0.1:1925/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      model: 'lumi-core-mistral.gguf',
-      messages,
-      stream: true
-    })
+    body: JSON.stringify(body)
   });
 
   const reader = response.body.getReader();
@@ -29,7 +46,7 @@ export async function askLumi(messages, onToken) {
       if (!line.startsWith('data:')) continue;
 
       const json = line.replace(/^data:\s*/, '').trim();
-      
+
       if (json === '[DONE]') return;
 
       try {

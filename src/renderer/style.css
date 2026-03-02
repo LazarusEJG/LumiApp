@@ -2,8 +2,8 @@
 body {
   margin: 0;
   padding: 0;
-  background: #121212;          /* deep charcoal */
-  color: #e6e6e6;               /* soft light gray */
+  background: #121212;
+  color: #e6e6e6;
   font-family: "Segoe UI", sans-serif;
 }
 
@@ -37,20 +37,20 @@ body {
   font-size: 15px;
 }
 
-/* User bubble (right side) */
+/* User bubble */
 .user {
-  background: #2a2a2a;          /* dark gray */
+  background: #2a2a2a;
   color: #e6e6e6;
   align-self: flex-end;
   border: 1px solid #3a3a3a;
 }
 
-/* Lumi bubble (left side) */
+/* Lumi bubble */
 .lumi {
-  background: #1e1e1e;          /* slightly lighter charcoal */
-  color: #f0eaff;               /* soft lavender-white */
+  background: #1e1e1e;
+  color: #f0eaff;
   align-self: flex-start;
-  border: 1px solid #3b2f4a;    /* subtle purple tint */
+  border: 1px solid #3b2f4a;
   box-shadow: 0 0 6px rgba(140, 90, 200, 0.25);
 }
 
@@ -61,7 +61,6 @@ body {
   padding-top: 10px;
 }
 
-/* Text input */
 #prompt {
   flex: 1;
   height: 60px;
@@ -76,15 +75,14 @@ body {
 }
 
 #prompt:focus {
-  border-color: #7a4fcf;        /* purple accent */
+  border-color: #7a4fcf;
   box-shadow: 0 0 4px rgba(122, 79, 207, 0.5);
 }
 
-/* Send button */
 #send {
   padding: 0 20px;
   font-size: 14px;
-  background: #7a4fcf;          /* Lumi purple */
+  background: #7a4fcf;
   color: white;
   border: none;
   border-radius: 6px;
@@ -97,4 +95,122 @@ body {
 
 #send:active {
   background: #6a3fba;
+}
+
+/* Hamburger menu */
+#menu-button {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #e6e6e6;
+  z-index: 20;
+}
+
+/* Dimming overlay */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 15;
+}
+
+#overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#settings-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: clamp(300px, 32vw, 360px);
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 25;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+
+#settings-drawer.open {
+  transform: translateX(0);
+}
+
+/* Tabs */
+#drawer-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.drawer-tab {
+  flex: 1;
+  padding: 8px;
+  background: #2a2a2a;
+  border: none;
+  color: #e6e6e6;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.drawer-tab.active {
+  background: #7a4fcf;
+}
+
+/* Scrollable content */
+#drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Tab content */
+.tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tab-panel.active {
+  display: flex;
+}
+
+/* Inputs inside drawer */
+#settings-drawer input,
+#settings-drawer textarea {
+  background: #111;
+  color: #e6e6e6;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 6px;
+}
+
+#settings-drawer textarea {
+  height: 120px;
+  resize: none;
+}
+
+/* Slider rows */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.slider-row span {
+  min-width: 40px;
+  text-align: right;
+  color: #ccc;
 }
