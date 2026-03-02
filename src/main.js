@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
@@ -10,12 +10,48 @@ const __dirname = path.dirname(__filename);
 
 let serverProcess = null;
 
+// -----------------------------
+// 🔧 In‑Memory Settings Store
+// -----------------------------
+let settings = {
+  persona: "",
+  temperature: 0.7,
+  top_p: 0.9,
+  top_k: 40,
+  min_p: 0.2,
+  repetition_penalty: 1.1,
+  max_tokens: 2048,
+  memory_enabled: true,
+  memory_length: 10
+};
+
+// -----------------------------
+// 🔌 IPC Channels for Settings
+// -----------------------------
+ipcMain.handle("get-settings", () => {
+  return settings;
+});
+
+ipcMain.handle("set-settings", (event, newSettings) => {
+  settings = { ...settings, ...newSettings };
+  return settings;
+});
+
+// Optional: clear memory from renderer
+ipcMain.handle("clear-memory", () => {
+  // Renderer will handle actual memory clearing logic.
+  return true;
+});
+
+// -----------------------------
+// 🪟 Window Creation
+// -----------------------------
 function createWindow() {
   const win = new BrowserWindow({
     width: 900,
     height: 900,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       sandbox: false
     }
@@ -24,6 +60,9 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
+// -----------------------------
+// 🧠 Wait for llama-server
+// -----------------------------
 function waitForServerReady(port, callback) {
   const attempt = () => {
     const req = http.get(`http://127.0.0.1:${port}/v1/models`, res => {
@@ -40,6 +79,9 @@ function waitForServerReady(port, callback) {
   attempt();
 }
 
+// -----------------------------
+// 🚀 App Ready
+// -----------------------------
 app.whenReady().then(() => {
   const isDev = !app.isPackaged;
 
@@ -49,7 +91,6 @@ app.whenReady().then(() => {
 
   const backendPath = path.join(basePath, 'llama-server.exe');
 
-  // 🔍 Find any .gguf file in the backend folder
   const modelFile = fs.readdirSync(basePath).find(f => f.endsWith('.gguf'));
 
   if (!modelFile) {
@@ -86,6 +127,9 @@ app.whenReady().then(() => {
   });
 });
 
+// -----------------------------
+// 🛑 Cleanup
+// -----------------------------
 app.on('window-all-closed', () => {
   if (serverProcess) {
     serverProcess.kill();
