@@ -16,6 +16,18 @@ body {
   box-sizing: border-box;
 }
 
+/* Lookup indicator */
+#lookup-indicator {
+  font-size: 11px;
+  color: #9a8fe0;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.hidden {
+  display: none;
+}
+
 /* Message list */
 #messages {
   flex: 1;
@@ -143,7 +155,6 @@ body {
   box-sizing: border-box;
 }
 
-
 #settings-drawer.open {
   transform: translateX(0);
 }
@@ -189,7 +200,8 @@ body {
 
 /* Inputs inside drawer */
 #settings-drawer input,
-#settings-drawer textarea {
+#settings-drawer textarea,
+#settings-drawer select {
   background: #111;
   color: #e6e6e6;
   border: 1px solid #333;

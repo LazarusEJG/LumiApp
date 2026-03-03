@@ -2,8 +2,12 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
+import https from 'node:https';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
+
+// NEW: import the lookup helper
+import { lookup as duckDuckGoLookup } from './webLookup.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +26,9 @@ let settings = {
   repetition_penalty: 1.1,
   max_tokens: 2048,
   memory_enabled: true,
-  memory_length: 10
+  memory_length: 10,
+  // New: web access mode for factual lookups
+  web_access_mode: "off" // "off" | "manual" | "auto"
 };
 
 // -----------------------------
@@ -42,6 +48,18 @@ ipcMain.handle("clear-memory", () => {
   // Renderer will handle actual memory clearing logic.
   return true;
 });
+
+// -----------------------------
+// 🌐 Web Lookup (DuckDuckGo)
+// -----------------------------
+ipcMain.handle("web-lookup", async (event, query) => {
+  console.log("[main] web-lookup called with query:", query);
+  if (!query || typeof query !== "string") return null;
+  const result = await duckDuckGoLookup(query);
+  console.log("[main] web-lookup result:", result);
+  return result;
+});
+
 
 // -----------------------------
 // 🪟 Window Creation

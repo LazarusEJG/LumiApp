@@ -18,12 +18,18 @@ const topKSlider = document.getElementById("top-k-slider");
 const repPenSlider = document.getElementById("rep-pen-slider");
 const maxTokensInput = document.getElementById("max-tokens-input");
 
+// New: web access mode select
+const webAccessSelect = document.getElementById("web-access-select");
+
 // Slider value labels
 const tempValue = document.getElementById("temp-value");
 const topPValue = document.getElementById("top-p-value");
 const minPValue = document.getElementById("min-p-value");
 const topKValue = document.getElementById("top-k-value");
 const repPenValue = document.getElementById("rep-pen-value");
+
+// Lookup indicator
+const lookupIndicator = document.getElementById("lookup-indicator");
 
 // Update slider number labels
 function updateSliderLabels() {
@@ -45,6 +51,11 @@ menuButton.addEventListener("click", async () => {
   topKSlider.value = settings.top_k;
   repPenSlider.value = settings.repetition_penalty;
   maxTokensInput.value = settings.max_tokens;
+
+  // New: web access mode
+  if (webAccessSelect) {
+    webAccessSelect.value = settings.web_access_mode || "off";
+  }
 
   updateSliderLabels();
 
@@ -78,7 +89,9 @@ function saveSettings() {
     min_p: parseFloat(minPSlider.value),
     top_k: parseInt(topKSlider.value),
     repetition_penalty: parseFloat(repPenSlider.value),
-    max_tokens: parseInt(maxTokensInput.value)
+    max_tokens: parseInt(maxTokensInput.value),
+    // New: web access mode
+    web_access_mode: webAccessSelect ? webAccessSelect.value : "off"
   });
 }
 
@@ -95,6 +108,13 @@ function saveSettings() {
   saveSettings();
   updateSliderLabels();
 }));
+
+// New: save web access mode on change
+if (webAccessSelect) {
+  webAccessSelect.addEventListener("change", () => {
+    saveSettings();
+  });
+}
 
 // -----------------------------
 // Chat Logic
@@ -115,6 +135,32 @@ function addMessage(role, text) {
   return div;
 }
 
+// Simple heuristic to detect factual lookup queries
+function shouldAutoLookup(text) {
+  const lower = text.toLowerCase();
+  const triggers = [
+    "current",
+    "today",
+    "latest",
+    "who is",
+    "what is",
+    "when is",
+    "when was",
+    "right now"
+  ];
+  return triggers.some(t => lower.includes(t));
+}
+
+// Manual lookup trigger phrases
+function isManualLookupCommand(text) {
+  const lower = text.toLowerCase();
+  return (
+    lower.startsWith("look this up") ||
+    lower.startsWith("search this") ||
+    lower.startsWith("check online")
+  );
+}
+
 async function sendMessage() {
   const userText = promptInput.value.trim();
   if (!userText) return;
@@ -127,9 +173,61 @@ async function sendMessage() {
   const lumiBubble = addMessage('lumi', '');
   let assistantText = '';
 
-  const settings = await window.lumi.getSettings();
+const settings = await window.lumi.getSettings();
+const mode = settings.web_access_mode || "off";
+console.log("web_access_mode from settings:", mode);
+console.log("userText:", userText);
+console.log("autoShouldLookup:", shouldAutoLookup(userText));
+console.log("manualShouldLookup:", isManualLookupCommand(userText));
 
-  await window.lumi.ask(messages, settings, token => {
+  
+
+  // Reset lookup indicator
+  if (lookupIndicator) {
+    lookupIndicator.classList.add("hidden");
+  }
+
+  let lookupBlock = null;
+
+  // Decide whether to perform a lookup
+  if (mode !== "off") {
+    let shouldLookup = false;
+    let queryForLookup = userText;
+
+    if (mode === "manual" && isManualLookupCommand(userText)) {
+      // Strip the command prefix for the actual query
+      queryForLookup = userText.replace(/^(look this up|search this|check online)/i, "").trim() || userText;
+      shouldLookup = true;
+    } else if (mode === "auto" && shouldAutoLookup(userText)) {
+      shouldLookup = true;
+    }
+
+    if (shouldLookup) {
+      console.log("→ Performing web lookup for:", queryForLookup);
+      const result = await window.lumi.webLookup(queryForLookup);
+      console.log("webLookup result:", result);
+
+      if (result && result.text) {
+        const sourceLine = result.source ? `\nSource: ${result.source}` : "";
+        lookupBlock = `Factual lookup:\n${result.text}${sourceLine}`;
+
+        if (lookupIndicator) {
+          lookupIndicator.classList.remove("hidden");
+        }
+      }
+    }
+  }
+
+  // Build messages for the model, optionally injecting a system-level factual block
+  let convo = [...messages];
+  if (lookupBlock) {
+    convo = [
+      { role: 'system', content: lookupBlock },
+      ...convo
+    ];
+  }
+
+  await window.lumi.ask(convo, settings, token => {
     assistantText += token;
     lumiBubble.textContent = assistantText;
     messagesDiv.scrollTop = messagesDiv.scrollHeight;

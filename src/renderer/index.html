@@ -76,6 +76,15 @@
       <div class="tab-panel" id="tab-model">
         <h3>Model Info</h3>
         <p id="model-info">Model: (loaded automatically)</p>
+
+        <!-- New: Web Access Mode dropdown -->
+        <h3>Web Access</h3>
+        <label for="web-access-select">Web Access Mode</label>
+        <select id="web-access-select">
+          <option value="off">Off (Local Only)</option>
+          <option value="manual">Manual</option>
+          <option value="auto">Automatic (Factual Lookups)</option>
+        </select>
       </div>
 
     </div>
@@ -83,6 +92,9 @@
 
   <!-- Chat UI -->
   <div id="chat">
+    <!-- New: lookup indicator -->
+    <div id="lookup-indicator" class="hidden">Online lookup used</div>
+
     <div id="messages"></div>
 
     <div id="input-area">
