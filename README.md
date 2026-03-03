@@ -69,6 +69,11 @@ These files ensure llama.cpp can initialize the correct compute backend on any C
 
 # Releases
 
+# v1.2.0
+
+Added model parameters alongslide a side menu that contains them
+Added model prompting which allows the you to give the model any kind of prompt
+
 # v1.1.3
 
 Added dynamic .gguf file loading
