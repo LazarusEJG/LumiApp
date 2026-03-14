@@ -10,6 +10,6 @@ contextBridge.exposeInMainWorld('lumi', {
   setSettings: (newSettings) => ipcRenderer.invoke("set-settings", newSettings),
   clearMemory: () => ipcRenderer.invoke("clear-memory"),
 
-  // New: web lookup via main process (DuckDuckGo)
-  webLookup: (query) => ipcRenderer.invoke("web-lookup", query)
+  // NEW: real web search (DuckDuckGo via BrowserWindow)
+  webSearch: (query) => ipcRenderer.invoke("web-search", query)
 });

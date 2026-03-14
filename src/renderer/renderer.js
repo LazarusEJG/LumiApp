@@ -123,7 +123,7 @@ const messagesDiv = document.getElementById('messages');
 const promptInput = document.getElementById('prompt');
 const sendButton = document.getElementById('send');
 
-// Global conversation history
+// Global conversation history (user/assistant only)
 let messages = [];
 
 function addMessage(role, text) {
@@ -173,14 +173,8 @@ async function sendMessage() {
   const lumiBubble = addMessage('lumi', '');
   let assistantText = '';
 
-const settings = await window.lumi.getSettings();
-const mode = settings.web_access_mode || "off";
-console.log("web_access_mode from settings:", mode);
-console.log("userText:", userText);
-console.log("autoShouldLookup:", shouldAutoLookup(userText));
-console.log("manualShouldLookup:", isManualLookupCommand(userText));
-
-  
+  const settings = await window.lumi.getSettings();
+  const mode = settings.web_access_mode || "off";
 
   // Reset lookup indicator
   if (lookupIndicator) {
@@ -195,7 +189,6 @@ console.log("manualShouldLookup:", isManualLookupCommand(userText));
     let queryForLookup = userText;
 
     if (mode === "manual" && isManualLookupCommand(userText)) {
-      // Strip the command prefix for the actual query
       queryForLookup = userText.replace(/^(look this up|search this|check online)/i, "").trim() || userText;
       shouldLookup = true;
     } else if (mode === "auto" && shouldAutoLookup(userText)) {
@@ -203,13 +196,17 @@ console.log("manualShouldLookup:", isManualLookupCommand(userText));
     }
 
     if (shouldLookup) {
-      console.log("→ Performing web lookup for:", queryForLookup);
-      const result = await window.lumi.webLookup(queryForLookup);
-      console.log("webLookup result:", result);
+      console.log("→ Performing web search for:", queryForLookup);
 
-      if (result && result.text) {
-        const sourceLine = result.source ? `\nSource: ${result.source}` : "";
-        lookupBlock = `Factual lookup:\n${result.text}${sourceLine}`;
+      const results = await window.lumi.webSearch(queryForLookup);
+      console.log("webSearch results:", results);
+
+      if (Array.isArray(results) && results.length > 0) {
+        lookupBlock = "Web search results:\n\n";
+
+        results.forEach((r, i) => {
+          lookupBlock += `${i + 1}. ${r.title}\n${r.snippet}\n${r.url}\n\n`;
+        });
 
         if (lookupIndicator) {
           lookupIndicator.classList.remove("hidden");
@@ -218,14 +215,27 @@ console.log("manualShouldLookup:", isManualLookupCommand(userText));
     }
   }
 
-  // Build messages for the model, optionally injecting a system-level factual block
-  let convo = [...messages];
+  // Build convo for llama-server:
+  // 1. System message (safe, plain text)
+  // 2. Optional user message with search results (plain text)
+  // 3. Full user/assistant history
+  const systemPrompt =
+    (settings.persona && settings.persona.trim().length > 0)
+      ? settings.persona
+      : "You are a helpful assistant named Lumi.";
+
+  let convo = [
+    { role: "system", content: systemPrompt }
+  ];
+
   if (lookupBlock) {
-    convo = [
-      { role: 'system', content: lookupBlock },
-      ...convo
-    ];
+    convo.push({
+      role: "user",
+      content: `Search results:\n${lookupBlock}`
+    });
   }
+
+  convo.push(...messages);
 
   await window.lumi.ask(convo, settings, token => {
     assistantText += token;

@@ -6,8 +6,8 @@ import https from 'node:https';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 
-// NEW: import the lookup helper
-import { lookup as duckDuckGoLookup } from './webLookup.js';
+// NEW: import the BrowserWindow-based web search
+import { webSearch } from './webSearch.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,23 +43,22 @@ ipcMain.handle("set-settings", (event, newSettings) => {
   return settings;
 });
 
-// Optional: clear memory from renderer
-ipcMain.handle("clear-memory", () => {
-  // Renderer will handle actual memory clearing logic.
-  return true;
-});
-
 // -----------------------------
-// 🌐 Web Lookup (DuckDuckGo)
+// 🌐 Web Search (DuckDuckGo via BrowserWindow)
 // -----------------------------
-ipcMain.handle("web-lookup", async (event, query) => {
-  console.log("[main] web-lookup called with query:", query);
-  if (!query || typeof query !== "string") return null;
-  const result = await duckDuckGoLookup(query);
-  console.log("[main] web-lookup result:", result);
-  return result;
-});
+ipcMain.handle("web-search", async (event, query) => {
+  console.log("[main] web-search called with query:", query);
+  if (!query || typeof query !== "string") return [];
 
+  try {
+    const results = await webSearch(query);
+    console.log("[main] web-search results:", results);
+    return results || [];
+  } catch (err) {
+    console.error("[main] web-search error:", err);
+    return [];
+  }
+});
 
 // -----------------------------
 // 🪟 Window Creation
