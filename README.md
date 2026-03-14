@@ -4,7 +4,8 @@ LumiApp is a fully standalone desktop application that runs large language model
 
 The goal of LumiApp is to provide a clean, simple, offline chat interface powered entirely by local inference. No cloud calls, no telemetry, no setup beyond dropping in a .gguf model.
 
-Backend packages can be used to allow for using GPU instead of CPU (check releases)
+Backend packages can be used to allow for using GPU instead of CPU (check releases for each dll pack)
+CPU backend is packaged by default.
 
 # Features
 
@@ -45,8 +46,8 @@ Download the latest release ZIP from GitHub.
 Extract the folder.
 
 Place your .gguf model file into:
-
 resources/backend/
+
 Run lumiapplication.exe.
 
 LumiApp will automatically start the backend and begin responding in real time.
@@ -60,7 +61,7 @@ resources/backend/
   llama.dll
   ggml.dll
   ggml-base.dll
-  ggml-cpu-*.dll        (CPU backend plugins)
+  ggml-cpu-*.dll        (CPU backend plugins or GPU depending)
   ggml-rpc.dll
   libomp140.x86_64.dll
   your-model.gguf       (user-provided)
@@ -68,6 +69,10 @@ resources/backend/
 These files ensure llama.cpp can initialize the correct compute backend on any CPU architecture.
 
 # Releases
+
+# v1.2.1
+
+Changed small ui phrasing and elements (check release for full details)
 
 # v1.2.0
 

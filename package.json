@@ -1,6 +1,6 @@
 {
   "name": "lumiapplication",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "A standalone llm loader with a chat interface",
   "license": "MIT",
   "author": "EJ Gordon",

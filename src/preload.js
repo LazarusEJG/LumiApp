@@ -8,5 +8,8 @@ contextBridge.exposeInMainWorld('lumi', {
 
   getSettings: () => ipcRenderer.invoke("get-settings"),
   setSettings: (newSettings) => ipcRenderer.invoke("set-settings", newSettings),
-  clearMemory: () => ipcRenderer.invoke("clear-memory")
+  clearMemory: () => ipcRenderer.invoke("clear-memory"),
+
+  // NEW: real web search (DuckDuckGo via BrowserWindow)
+  webSearch: (query) => ipcRenderer.invoke("web-search", query)
 });

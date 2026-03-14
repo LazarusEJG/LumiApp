@@ -18,12 +18,18 @@ const topKSlider = document.getElementById("top-k-slider");
 const repPenSlider = document.getElementById("rep-pen-slider");
 const maxTokensInput = document.getElementById("max-tokens-input");
 
+// New: web access mode select
+const webAccessSelect = document.getElementById("web-access-select");
+
 // Slider value labels
 const tempValue = document.getElementById("temp-value");
 const topPValue = document.getElementById("top-p-value");
 const minPValue = document.getElementById("min-p-value");
 const topKValue = document.getElementById("top-k-value");
 const repPenValue = document.getElementById("rep-pen-value");
+
+// Lookup indicator
+const lookupIndicator = document.getElementById("lookup-indicator");
 
 // Update slider number labels
 function updateSliderLabels() {
@@ -45,6 +51,11 @@ menuButton.addEventListener("click", async () => {
   topKSlider.value = settings.top_k;
   repPenSlider.value = settings.repetition_penalty;
   maxTokensInput.value = settings.max_tokens;
+
+  // New: web access mode
+  if (webAccessSelect) {
+    webAccessSelect.value = settings.web_access_mode || "off";
+  }
 
   updateSliderLabels();
 
@@ -78,7 +89,9 @@ function saveSettings() {
     min_p: parseFloat(minPSlider.value),
     top_k: parseInt(topKSlider.value),
     repetition_penalty: parseFloat(repPenSlider.value),
-    max_tokens: parseInt(maxTokensInput.value)
+    max_tokens: parseInt(maxTokensInput.value),
+    // New: web access mode
+    web_access_mode: webAccessSelect ? webAccessSelect.value : "off"
   });
 }
 
@@ -96,6 +109,13 @@ function saveSettings() {
   updateSliderLabels();
 }));
 
+// New: save web access mode on change
+if (webAccessSelect) {
+  webAccessSelect.addEventListener("change", () => {
+    saveSettings();
+  });
+}
+
 // -----------------------------
 // Chat Logic
 // -----------------------------
@@ -103,7 +123,7 @@ const messagesDiv = document.getElementById('messages');
 const promptInput = document.getElementById('prompt');
 const sendButton = document.getElementById('send');
 
-// Global conversation history
+// Global conversation history (user/assistant only)
 let messages = [];
 
 function addMessage(role, text) {
@@ -113,6 +133,32 @@ function addMessage(role, text) {
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
   return div;
+}
+
+// Simple heuristic to detect factual lookup queries
+function shouldAutoLookup(text) {
+  const lower = text.toLowerCase();
+  const triggers = [
+    "current",
+    "today",
+    "latest",
+    "who is",
+    "what is",
+    "when is",
+    "when was",
+    "right now"
+  ];
+  return triggers.some(t => lower.includes(t));
+}
+
+// Manual lookup trigger phrases
+function isManualLookupCommand(text) {
+  const lower = text.toLowerCase();
+  return (
+    lower.startsWith("look this up") ||
+    lower.startsWith("search this") ||
+    lower.startsWith("check online")
+  );
 }
 
 async function sendMessage() {
@@ -128,8 +174,70 @@ async function sendMessage() {
   let assistantText = '';
 
   const settings = await window.lumi.getSettings();
+  const mode = settings.web_access_mode || "off";
 
-  await window.lumi.ask(messages, settings, token => {
+  // Reset lookup indicator
+  if (lookupIndicator) {
+    lookupIndicator.classList.add("hidden");
+  }
+
+  let lookupBlock = null;
+
+  // Decide whether to perform a lookup
+  if (mode !== "off") {
+    let shouldLookup = false;
+    let queryForLookup = userText;
+
+    if (mode === "manual" && isManualLookupCommand(userText)) {
+      queryForLookup = userText.replace(/^(look this up|search this|check online)/i, "").trim() || userText;
+      shouldLookup = true;
+    } else if (mode === "auto" && shouldAutoLookup(userText)) {
+      shouldLookup = true;
+    }
+
+    if (shouldLookup) {
+      console.log("→ Performing web search for:", queryForLookup);
+
+      const results = await window.lumi.webSearch(queryForLookup);
+      console.log("webSearch results:", results);
+
+      if (Array.isArray(results) && results.length > 0) {
+        lookupBlock = "Web search results:\n\n";
+
+        results.forEach((r, i) => {
+          lookupBlock += `${i + 1}. ${r.title}\n${r.snippet}\n${r.url}\n\n`;
+        });
+
+        if (lookupIndicator) {
+          lookupIndicator.classList.remove("hidden");
+        }
+      }
+    }
+  }
+
+  // Build convo for llama-server:
+  // 1. System message (safe, plain text)
+  // 2. Optional user message with search results (plain text)
+  // 3. Full user/assistant history
+  const systemPrompt =
+    (settings.persona && settings.persona.trim().length > 0)
+      ? settings.persona
+      : "You are a helpful assistant named Lumi.";
+
+  let convo = [
+    { role: "system", content: systemPrompt }
+  ];
+
+  if (lookupBlock) {
+    convo.push({
+      role: "user",
+      content: `Search results:\n${lookupBlock}`
+    });
+  }
+
+  convo.push(...messages);
+
+  await window.lumi.ask(convo, settings, token => {
     assistantText += token;
     lumiBubble.textContent = assistantText;
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
