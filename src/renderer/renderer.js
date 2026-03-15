@@ -215,18 +215,11 @@ async function sendMessage() {
     }
   }
 
-  // Build convo for llama-server:
-  // 1. System message (safe, plain text)
-  // 2. Optional user message with search results (plain text)
-  // 3. Full user/assistant history
-  const systemPrompt =
-    (settings.persona && settings.persona.trim().length > 0)
-      ? settings.persona
-      : "You are a helpful assistant named Lumi.";
-
-  let convo = [
-    { role: "system", content: systemPrompt }
-  ];
+  // -----------------------------
+  // FIX: Do NOT insert a system message here.
+  // lumi.js now handles system message insertion.
+  // -----------------------------
+  let convo = [];
 
   if (lookupBlock) {
     convo.push({
@@ -235,8 +228,10 @@ async function sendMessage() {
     });
   }
 
+  // Add conversation history
   convo.push(...messages);
 
+  // Ask Lumi
   await window.lumi.ask(convo, settings, token => {
     assistantText += token;
     lumiBubble.textContent = assistantText;
