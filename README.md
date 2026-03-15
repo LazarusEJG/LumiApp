@@ -70,6 +70,9 @@ These files ensure llama.cpp can initialize the correct compute backend on any C
 
 # Releases
 
+# v1.3.0
+Added web search functionality
+
 # v1.2.1
 
 Changed small ui phrasing and elements (check release for full details)
