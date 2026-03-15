@@ -1,13 +1,15 @@
 export async function askLumi(messages, settings, onToken) {
-  // Prepend system persona message for llama-server
+  // Prepend system persona message ONLY if it exists
   const fullMessages = [
-    { role: "system", content: settings.persona || "" },
+    ...(settings.persona
+      ? [{ role: "system", content: settings.persona }]
+      : []),
     ...messages
   ];
 
   // Build the request body with persona + sampling parameters
   const body = {
-    model: 'lumi-core-mistral.gguf',
+    model: settings.modelName,   // <-- dynamic model name
     messages: fullMessages,
     stream: true,
 
