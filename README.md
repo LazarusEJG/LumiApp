@@ -70,8 +70,11 @@ These files ensure llama.cpp can initialize the correct compute backend on any C
 
 # Releases
 
+# v1.3.1
+fixed compatibility for more models
+
 # v1.3.0
-Added web search functionality
+Added web search functionality & updated AMD clean dlls package
 
 # v1.2.1
 
