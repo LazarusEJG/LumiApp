@@ -1,6 +1,6 @@
 # LumiApp — Local, Offline LLM Desktop Application
 
-LumiApp is a fully standalone desktop application that runs large language models locally using the llama-server backend from llama.cpp. It bundles all required runtime components, including CPU backend plugins, so it can run on any Windows machine without additional installs or dependencies.
+LumiApp is a fully standalone desktop application built with the help of Copilot that runs large language models locally using the llama-server backend from llama.cpp. It bundles all required runtime components, including CPU backend plugins, so it can run on any Windows machine without additional installs or dependencies.
 
 The goal of LumiApp is to provide a clean, simple, offline chat interface powered entirely by local inference. No cloud calls, no telemetry, no setup beyond dropping in a .gguf model.
 
